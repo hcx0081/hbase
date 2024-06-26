@@ -1,5 +1,6 @@
 package com.hbase;
 
+import lombok.extern.slf4j.Slf4j;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.hbase.*;
 import org.apache.hadoop.hbase.client.*;
@@ -13,6 +14,7 @@ import java.util.List;
 /**
  * HBase工具类
  */
+@Slf4j
 public class HBaseUtils {
     private static final Connection connection;
     
@@ -21,6 +23,7 @@ public class HBaseUtils {
         conf.set("hbase.zookeeper.quorum", "192.168.100.100");
         try {
             connection = ConnectionFactory.createConnection(conf);
+            log.info("创建HBase连接成功！");
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
@@ -42,6 +45,7 @@ public class HBaseUtils {
         if (connection != null) {
             try {
                 connection.close();
+                log.info("关闭HBase连接成功！");
             } catch (IOException e) {
                 throw new RuntimeException(e);
             }

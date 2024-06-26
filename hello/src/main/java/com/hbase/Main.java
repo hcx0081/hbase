@@ -11,6 +11,11 @@ public class Main {
         
         // List<String> list = HBaseUtils.scan("test", "testTable", "0", "10000");
         // list.forEach(System.out::println);
-        HBaseUtils.delete("test", "testTable", "1000", "info", "name");
+        // HBaseUtils.delete("test", "testTable", "1000", "info", "name");
+        //
+        
+        System.out.println(HBaseUtils.getConnection());
+        HBaseUtils.closeConnection();
+        System.out.println(HBaseUtils.getConnection());
     }
 }
