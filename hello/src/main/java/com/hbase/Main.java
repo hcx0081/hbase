@@ -2,7 +2,7 @@ package com.hbase;
 
 public class Main {
     public static void main(String[] args) {
-        // HBaseUtils.deleteTable("test", "testTable");
+        // HBaseUtils.dropTable("test", "testTable");
         // HBaseUtils.createTable("test", "testTable", "info");
         // HBaseUtils.put("test", "testTable", "1000", "info", "name", "zs");
         

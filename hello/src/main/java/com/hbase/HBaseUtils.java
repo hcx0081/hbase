@@ -121,8 +121,9 @@ public class HBaseUtils {
         try (Admin admin = connection.getAdmin()) {
             TableDescriptor tableDescriptor = admin.getDescriptor(TableName.valueOf(namespace, table));
             TableDescriptorBuilder tableDescriptorBuilder = TableDescriptorBuilder.newBuilder(tableDescriptor);
-            ColumnFamilyDescriptorBuilder columnFamilyDescriptorBuilder = ColumnFamilyDescriptorBuilder.newBuilder(tableDescriptor.getColumnFamily(columnFamily.getBytes(StandardCharsets.UTF_8)))
-                                                                                                       .setMaxVersions(maxVersion);
+            ColumnFamilyDescriptorBuilder columnFamilyDescriptorBuilder =
+                    ColumnFamilyDescriptorBuilder.newBuilder(tableDescriptor.getColumnFamily(columnFamily.getBytes(StandardCharsets.UTF_8)))
+                                                 .setMaxVersions(maxVersion);
             tableDescriptorBuilder.modifyColumnFamily(columnFamilyDescriptorBuilder.build());
             admin.modifyTable(tableDescriptorBuilder.build());
         } catch (IOException e) {
@@ -131,11 +132,13 @@ public class HBaseUtils {
     }
     
     /**
-     * @param namespace
-     * @param table
-     * @return
+     * 删除表格
+     *
+     * @param namespace 命令空间
+     * @param table     表格
+     * @return 是否删除成功
      */
-    public static boolean deleteTable(String namespace, String table) {
+    public static boolean dropTable(String namespace, String table) {
         if (!isTableExist(namespace, table)) {
             return false;
         }
@@ -210,6 +213,15 @@ public class HBaseUtils {
         }
     }
     
+    /**
+     * 删除单元格
+     *
+     * @param namespace       命名空间
+     * @param table           表格
+     * @param rowKey          RowKey
+     * @param columnFamily    列族
+     * @param columnQualifier 列限定符
+     */
     public static void delete(String namespace, String table, String rowKey, String columnFamily, String columnQualifier) {
         if (!isTableExist(namespace, table)) {
             return;
