@@ -2,7 +2,7 @@ package com.hbase;
 
 public class Main {
     public static void main(String[] args) {
-        // HBaseUtils.dropTable("test", "testTable");
+        // HBaseUtils.deleteTable("test", "testTable");
         // HBaseUtils.createTable("test", "testTable", "info");
         // HBaseUtils.put("test", "testTable", "1000", "info", "name", "zs");
         
@@ -16,6 +16,8 @@ public class Main {
         
         System.out.println(HBaseUtils.getConnection());
         HBaseUtils.closeConnection();
+        System.out.println(HBaseUtils.getConnection());
+        HBaseUtils.createTable("test", "testTable111", "info");
         System.out.println(HBaseUtils.getConnection());
     }
 }

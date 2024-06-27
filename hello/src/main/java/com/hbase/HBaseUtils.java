@@ -16,18 +16,7 @@ import java.util.List;
  */
 @Slf4j
 public class HBaseUtils {
-    private static final Connection connection;
-    
-    static {
-        Configuration conf = new Configuration();
-        conf.set("hbase.zookeeper.quorum", "192.168.100.100");
-        try {
-            connection = ConnectionFactory.createConnection(conf);
-            log.info("创建HBase连接成功！");
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
-    }
+    private static Connection connection;
     
     /**
      * 获取HBase连接
@@ -35,6 +24,17 @@ public class HBaseUtils {
      * @return HBase连接
      */
     public static Connection getConnection() {
+        if (connection.isClosed() || connection == null) {
+            Configuration conf = new Configuration();
+            conf.set("hbase.zookeeper.quorum", "192.168.100.100");
+            try {
+                connection = ConnectionFactory.createConnection(conf);
+                log.info("创建HBase连接成功！");
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+        }
+        log.info("获取HBase连接成功！");
         return connection;
     }
     
@@ -42,7 +42,7 @@ public class HBaseUtils {
      * 关闭HBase连接
      */
     public static void closeConnection() {
-        if (connection != null) {
+        if (!connection.isClosed() || connection != null) {
             try {
                 connection.close();
                 log.info("关闭HBase连接成功！");
@@ -96,8 +96,9 @@ public class HBaseUtils {
         try (Admin admin = connection.getAdmin()) {
             TableDescriptorBuilder tableDescriptorBuilder = TableDescriptorBuilder.newBuilder(TableName.valueOf(namespace, table));
             for (String columnFamily : columnFamilies) {
-                tableDescriptorBuilder.setColumnFamily(ColumnFamilyDescriptorBuilder.newBuilder(columnFamily.getBytes(StandardCharsets.UTF_8))
-                                                                                    .build());
+                ColumnFamilyDescriptorBuilder columnFamilyDescriptorBuilder =
+                        ColumnFamilyDescriptorBuilder.newBuilder(columnFamily.getBytes(StandardCharsets.UTF_8));
+                tableDescriptorBuilder.setColumnFamily(columnFamilyDescriptorBuilder.build());
             }
             admin.createTable(tableDescriptorBuilder.build());
         } catch (IOException e) {
@@ -116,7 +117,7 @@ public class HBaseUtils {
      */
     public static void modifyTable(String namespace, String table, String columnFamily, int maxVersion) {
         if (!isTableExist(namespace, table)) {
-            return;
+            throw new RuntimeException("表格不存在");
         }
         try (Admin admin = connection.getAdmin()) {
             TableDescriptor tableDescriptor = admin.getDescriptor(TableName.valueOf(namespace, table));
@@ -138,9 +139,9 @@ public class HBaseUtils {
      * @param table     表格
      * @return 是否删除成功
      */
-    public static boolean dropTable(String namespace, String table) {
+    public static boolean deleteTable(String namespace, String table) {
         if (!isTableExist(namespace, table)) {
-            return false;
+            throw new RuntimeException("表格不存在");
         }
         try (Admin admin = connection.getAdmin()) {
             try {
@@ -172,7 +173,7 @@ public class HBaseUtils {
      */
     public static void put(String namespace, String table, String rowKey, String columnFamily, String columnQualifier, String value) {
         if (!isTableExist(namespace, table)) {
-            return;
+            throw new RuntimeException("表格不存在");
         }
         try (Table t = connection.getTable(TableName.valueOf(namespace, table))) {
             Put put = new Put(rowKey.getBytes(StandardCharsets.UTF_8));
@@ -195,7 +196,7 @@ public class HBaseUtils {
      */
     public static List<String> get(String namespace, String table, String rowKey, String columnFamily, String columnQualifier) {
         if (!isTableExist(namespace, table)) {
-            return null;
+            throw new RuntimeException("表格不存在");
         }
         try (Table t = connection.getTable(TableName.valueOf(namespace, table))) {
             Get get = new Get(rowKey.getBytes(StandardCharsets.UTF_8));
@@ -224,7 +225,7 @@ public class HBaseUtils {
      */
     public static void delete(String namespace, String table, String rowKey, String columnFamily, String columnQualifier) {
         if (!isTableExist(namespace, table)) {
-            return;
+            throw new RuntimeException("表格不存在");
         }
         try (Table t = connection.getTable(TableName.valueOf(namespace, table))) {
             Delete delete = new Delete(rowKey.getBytes(StandardCharsets.UTF_8));
@@ -247,7 +248,7 @@ public class HBaseUtils {
      */
     public static List<String> scan(String namespace, String table, String startRow, String stopRow) {
         if (!isTableExist(namespace, table)) {
-            return null;
+            throw new RuntimeException("表格不存在");
         }
         try (Table t = connection.getTable(TableName.valueOf(namespace, table))) {
             Scan scan = new Scan();
@@ -278,7 +279,7 @@ public class HBaseUtils {
      */
     public static List<String> filterScan(String namespace, String table, String columnFamily, String columnQualifier, String value, String startRow, String stopRow) {
         if (!isTableExist(namespace, table)) {
-            return null;
+            throw new RuntimeException("表格不存在");
         }
         try (Table t = connection.getTable(TableName.valueOf(namespace, table))) {
             Scan scan = new Scan();
