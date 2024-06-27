@@ -30,6 +30,7 @@ public class HBaseUtils {
             try {
                 connection = ConnectionFactory.createConnection(conf);
                 log.info("创建HBase连接成功！");
+                return connection;
             } catch (IOException e) {
                 throw new RuntimeException(e);
             }
