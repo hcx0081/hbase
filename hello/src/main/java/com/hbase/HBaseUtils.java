@@ -24,7 +24,7 @@ public class HBaseUtils {
      * @return HBase连接
      */
     public static Connection getConnection() {
-        if (connection.isClosed() || connection == null) {
+        if (connection == null || connection.isClosed()) {
             Configuration conf = new Configuration();
             conf.set("hbase.zookeeper.quorum", "192.168.100.100");
             try {
@@ -42,7 +42,7 @@ public class HBaseUtils {
      * 关闭HBase连接
      */
     public static void closeConnection() {
-        if (!connection.isClosed() || connection != null) {
+        if (connection != null) {
             try {
                 connection.close();
                 log.info("关闭HBase连接成功！");
