@@ -106,7 +106,6 @@ public class HBaseUtils {
         }
     }
     
-    
     /**
      * 修改表格
      *
