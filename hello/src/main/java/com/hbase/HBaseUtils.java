@@ -56,13 +56,21 @@ public class HBaseUtils {
     /* ============================================ DDL =========================================== */
     
     /**
-     * 创建命名空间
+     * 判断命名空间是否存在
      *
-     * @param namespace 命名空间名称
+     * @param namespace 命名空间
+     * @return 表格是否存在
      */
-    public static void createNamespace(String namespace) {
+    public static boolean isNamespaceExist(String namespace) {
         try (Admin admin = connection.getAdmin()) {
-            admin.createNamespace(NamespaceDescriptor.create(namespace).build());
+            try {
+                admin.getNamespaceDescriptor(namespace);
+                log.info("命名空间：{} 存在", namespace);
+                return true;
+            } catch (IOException e) {
+                log.info("命名空间：{} 不存在", namespace);
+                return false;
+            }
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
@@ -84,6 +92,19 @@ public class HBaseUtils {
     }
     
     /**
+     * 创建命名空间
+     *
+     * @param namespace 命名空间名称
+     */
+    public static void createNamespace(String namespace) {
+        try (Admin admin = connection.getAdmin()) {
+            admin.createNamespace(NamespaceDescriptor.create(namespace).build());
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
+    
+    /**
      * 创建表格
      *
      * @param namespace      命名空间
@@ -95,6 +116,9 @@ public class HBaseUtils {
             throw new RuntimeException("表格至少需要一个列族");
         }
         try (Admin admin = connection.getAdmin()) {
+            if (!isTableExist(namespace, table)) {
+                createNamespace(namespace);
+            }
             TableDescriptorBuilder tableDescriptorBuilder = TableDescriptorBuilder.newBuilder(TableName.valueOf(namespace, table));
             for (String columnFamily : columnFamilies) {
                 ColumnFamilyDescriptorBuilder columnFamilyDescriptorBuilder =
