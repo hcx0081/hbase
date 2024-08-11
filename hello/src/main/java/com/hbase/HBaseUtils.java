@@ -12,6 +12,7 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.ExecutionException;
 
 /**
  * HBase工具类
@@ -35,6 +36,22 @@ public class HBaseUtils {
     }
     
     /**
+     * 创建HBase异步连接
+     *
+     * @return HBase连接
+     */
+    public static AsyncConnection createAsyncConnection() {
+        Configuration conf = new Configuration();
+        conf.set("hbase.zookeeper.quorum", "192.168.100.100");
+        try {
+            return ConnectionFactory.createAsyncConnection(conf).get();
+        } catch (ExecutionException | InterruptedException e) {
+            e.printStackTrace();
+            throw new RuntimeException("创建HBase异步连接失败！");
+        }
+    }
+    
+    /**
      * 关闭HBase连接
      *
      * @param connection HBase连接
@@ -47,6 +64,23 @@ public class HBaseUtils {
             } catch (IOException e) {
                 e.printStackTrace();
                 throw new RuntimeException("关闭HBase连接失败！");
+            }
+        }
+    }
+    
+     /**
+     * 关闭HBase异步连接
+     *
+     * @param asyncConnection HBase异步连接
+     */
+    public static void closeConnection(AsyncConnection asyncConnection) {
+        if (asyncConnection != null) {
+            try {
+                asyncConnection.close();
+                log.info("关闭HBase异步连接成功！");
+            } catch (IOException e) {
+                e.printStackTrace();
+                throw new RuntimeException("关闭HBase异步连接失败！");
             }
         }
     }
